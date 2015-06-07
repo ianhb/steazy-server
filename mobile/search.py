@@ -22,7 +22,11 @@ def parse_spotify(data):
         if check_if_exists({'source': 'Spotify', 'tag': track['id']}):
             songs.append(Song.objects.get(source='Spotify', tag=track['id']))
         else:
-            song = Song(name=track['name'], artist=track['artists'][0]['name'], album=track['album']['name'],
+            artists = ''
+            for art in track['artists']:
+                artists += art['name'] + ', '
+            artists = artists[:len(artists) - 2]
+            song = Song(name=track['name'], artist=artists, album=track['album']['name'],
                         source='Spotify', tag=track['id'], inherited_popularity=track['popularity'])
             song.save()
             songs.append(song)
