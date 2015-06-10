@@ -19,11 +19,11 @@ class Song(models.Model):
         ('Soundcloud', 'SOU')
     ]
 
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=255)
 
-    artist = models.CharField(max_length=30)
+    artist = models.CharField(max_length=255)
 
-    album = models.CharField(max_length=30)
+    album = models.CharField(max_length=255)
 
     source = models.CharField(choices=SOURCES, max_length=20)
 

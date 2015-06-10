@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from mobile.models import Song, Playlist, Song_to_Playlist
+from models import Song, Playlist, Song_to_Playlist
 
 
 class SongsInline(admin.TabularInline):
