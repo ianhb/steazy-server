@@ -6,7 +6,7 @@ from mobile.models import Song, Playlist, Song_to_Playlist
 
 class SongsInline(admin.TabularInline):
     model = Song_to_Playlist
-    fields = ['song', ]
+    fields = ['song', 'added_by']
     extra = 0
 
 
