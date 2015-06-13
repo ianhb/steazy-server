@@ -62,7 +62,7 @@ def parse_soundcloud(data):
         elif track.streamable:
             song = Song(name=track.title, artist=track.user['username'], album='',
                         source='Soundcloud', tag=track.id,
-                        inherited_popularity=track.favoritings_count / float(1000000))
+                        inherited_popularity=track.favoritings_count / float(10000))
             song.save()
             songs.append(song)
     return songs
