@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from rest_framework import serializers
 
-from mobile.models import Song, Playlist, Song_to_Playlist
+from models import Song, Playlist, Song_to_Playlist
 
 __author__ = 'Ian'
 

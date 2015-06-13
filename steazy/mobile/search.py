@@ -1,7 +1,9 @@
 import json
 import urllib2
 
-from mobile.models import Song
+import soundcloud as soundcloud
+
+from models import Song
 
 __author__ = 'Ian'
 
@@ -38,16 +40,29 @@ def sort_songs(songs):
 
 
 def search(query):
-    return sort_songs(parse_spotify(search_spotify(query)))
+    return sort_songs(parse_spotify(search_spotify(query)) + parse_soundcloud(search_soundcloud(query)))
 
 
-'''
+
 def search_soundcloud(arguement):
     # create a client object with your app credentials
-    client = soundcloud.Client(client_id='YOUR_CLIENT_ID')
+    client = soundcloud.Client(client_id='81ca87317b91e4051f6d8797e5cce358')
 
     # find all sounds of buskers licensed under 'creative commons share alike'
-    tracks = client.get('/tracks', q=['kygo'],limit=10)
-    for track in tracks:
-        print track.title + " " + track.artist
-'''
+    tracks = client.get('/tracks', q=arguement, limit=10, encoding="utf-8")
+
+    return tracks
+
+
+def parse_soundcloud(data):
+    songs = []
+    for track in data:
+        if check_if_exists({'source': 'Soundclodu', 'tag': track.id}):
+            songs.append(Song.objects.get(source='Soundcloud', tag=track.id))
+        elif track.streamable:
+            song = Song(name=track.title, artist=track.user['username'], album='',
+                        source='Soundcloud', tag=track.id,
+                        inherited_popularity=track.favoritings_count / float(1000000))
+            song.save()
+            songs.append(song)
+    return songs

@@ -7,9 +7,9 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from mobile.models import Song, Playlist, Song_to_Playlist, Play
-from mobile.search import search
-from mobile.serializers import SongSerializer, PlaylistSerializer, UserSerializer
+from models import Song, Playlist, Song_to_Playlist, Play
+from search import search
+from serializers import SongSerializer, PlaylistSerializer, UserSerializer
 
 
 class SongsList(APIView):

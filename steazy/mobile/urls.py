@@ -1,7 +1,7 @@
 from django.conf.urls import url, patterns
 from rest_framework.urlpatterns import format_suffix_patterns
 
-from mobile import views
+import views
 
 __author__ = 'Ian'
 
