@@ -13,6 +13,10 @@ from serializers import SongSerializer, PlaylistSerializer, UserSerializer
 
 
 class SongsList(APIView):
+    permission_classes = [
+        permissions.AllowAny,
+    ]
+
     def _contains(self, data):
         source = data['source']
         tag = data['tag']
