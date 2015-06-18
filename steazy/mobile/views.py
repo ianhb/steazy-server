@@ -1,9 +1,9 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from django.http import Http404
 
 # Create your views here.
 from rest_framework import status, permissions
-from rest_framework.generics import CreateAPIView
+from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -53,39 +53,35 @@ class PlaylistDetail(APIView):
         return Response(serial.data)
 
 
-class UserList(APIView):
+class UserView(APIView):
     def get(self, request, format=None):
-        users = get_user_model().objects.all()
-        serial = UserSerializer(users, many=True)
-        return Response(serial.data)
-
-
-class CreateUserView(CreateAPIView):
-    model = get_user_model()
-    permission_classes = [
-        permissions.AllowAny
-    ]
-    serializer_class = UserSerializer
-
-
-class UserDetail(APIView):
-    def _get_user(self, pk):
-        try:
-            return get_user_model().objects.get(pk=pk)
-        except get_user_model().DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk, format=None):
-        user = self._get_user(pk)
+        user = request.user
         serial = UserSerializer(user)
         return Response(serial.data)
 
+
+class CreateUser(APIView):
+
+    permission_classes = [
+        permissions.AllowAny,
+    ]
+
+    def post(self, request, format=None):
+        ser = UserSerializer(data=request.data)
+        if ser.is_valid():
+            user = User.objects.create_user(
+                ser.initial_data['username'],
+                ser.initial_data['email'],
+                ser.initial_data['password']
+            )
+            return Response(Token.objects.get(user=user), status=status.HTTP_201_CREATED)
+        return Response(ser._errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PlayView(APIView):
     def post(self, request, format=None):
         data = request.data
         try:
-            player = get_user_model().objects.get(pk=data['user'])
+            player = request.user
             song = Song.objects.get(pk=data['song'])
             play = Play(player=player, song=song)
             play.save()
@@ -93,8 +89,6 @@ class PlayView(APIView):
             song.plays += 1
             song.save()
             return Response(serial.data, status=status.HTTP_201_CREATED)
-        except get_user_model().DoesNotExist:
-            return Response("User PK DNE", status=status.HTTP_400_BAD_REQUEST)
         except Song.DoesNotExist:
             return Response("Song PK DNE", status=status.HTTP_400_BAD_REQUEST)
 
@@ -105,7 +99,7 @@ class AddToPlaylistView(APIView):
         try:
             playlist = Playlist.objects.get(pk=data['playlist'])
             song = Song.objects.get(pk=data['song'])
-            user = get_user_model().objects.get(pk=data['added_by'])
+            user = request.user
             add = Song_to_Playlist(added_by=user, playlist=playlist, song=song)
             add.save()
             return Response(data, status=status.HTTP_201_CREATED)
@@ -113,5 +107,3 @@ class AddToPlaylistView(APIView):
             return Response("Playlist PK DNE", status=status.HTTP_400_BAD_REQUEST)
         except Song.DoesNotExist:
             return Response("Song PK DNE", status=status.HTTP_400_BAD_REQUEST)
-        except get_user_model().DoesNotExist:
-            return Response("User PK DNE", status=status.HTTP_400_BAD_REQUEST)
