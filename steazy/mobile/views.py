@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.http import Http404
 
 # Create your views here.
+from django.utils.datastructures import MultiValueDictKeyError
 from rest_framework import status, permissions
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -23,9 +24,12 @@ class SongsList(APIView):
         return Song.objects.filter(source=source, tag=tag).exists()
 
     def get(self, request, format=None):
-        songs = search(request.data['query'])
-        serial = SongSerializer(songs, many=True)
-        return Response(serial.data)
+        try:
+            songs = search(request.GET.get('query'))
+            serial = SongSerializer(songs, many=True)
+            return Response(serial.data)
+        except MultiValueDictKeyError:
+            return Response(request.data)
 
 
 class PlaylistList(APIView):
