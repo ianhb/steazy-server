@@ -19,7 +19,7 @@ class SongsList(APIView):
         return Song.objects.filter(source=source, tag=tag).exists()
 
     def get(self, request, format=None):
-        songs = search(request.query_params['query'])
+        songs = search(request.data['query'])
         serial = SongSerializer(songs, many=True)
         return Response(serial.data)
 
