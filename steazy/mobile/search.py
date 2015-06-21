@@ -57,7 +57,7 @@ def search_soundcloud(arguement):
 def parse_soundcloud(data):
     songs = []
     for track in data:
-        if check_if_exists({'source': 'Soundclodu', 'tag': track.id}):
+        if check_if_exists({'source': 'Soundcloud', 'tag': track.id}):
             songs.append(Song.objects.get(source='Soundcloud', tag=track.id))
         elif track.streamable:
             song = Song(name=track.title, artist=track.user['username'], album='',
