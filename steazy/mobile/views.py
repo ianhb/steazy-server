@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 
 from models import Song, Playlist, Song_to_Playlist, Play
 from search import search
-from serializers import SongSerializer, PlaylistSerializer, UserSerializer
+from serializers import SongSerializer, PlaylistSerializer, UserSerializer, TokenSerializer
 
 
 class SongsList(APIView):
@@ -75,14 +75,20 @@ class CreateUser(APIView):
     ]
 
     def post(self, request, format=None):
+        request.data['user_permissions'] = [1]
+        request.data['groups'] = [1]
         ser = UserSerializer(data=request.data)
         if ser.is_valid():
+            if (User.objects.filter(email=ser.initial_data['email']).exists()):
+                data = {}
+                data['email'] = ['This field must be unique']
+                return Response(data, status=status.HTTP_409_CONFLICT)
             user = User.objects.create_user(
                 ser.initial_data['username'],
                 ser.initial_data['email'],
                 ser.initial_data['password']
             )
-            return Response(Token.objects.get(user=user), status=status.HTTP_201_CREATED)
+            return Response(TokenSerializer(Token.objects.get(user=user)).data, status=status.HTTP_201_CREATED)
         return Response(ser._errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PlayView(APIView):

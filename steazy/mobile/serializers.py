@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
 
 from models import Song, Playlist, Song_to_Playlist
 
@@ -49,6 +50,11 @@ class UserSerializer(serializers.ModelSerializer):
         playlists = obj.playlist_set
         return PlaylistSerializer(playlists, many=True).data
 
+
+class TokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Token
+        fields = ('key',)
 
 class SongtoPlaylistSerializer(serializers.ModelSerializer):
     song_data = serializers.SerializerMethodField()
