@@ -26,9 +26,9 @@ def parse_spotify(data):
         else:
             artists = ''
             for art in track['artists']:
-                artists += art['name'] + ', '
+                artists += unicode(art['name']) + ', '
             artists = artists[:len(artists) - 2]
-            song = Song(name=track['name'], artist=artists, album=track['album']['name'],
+            song = Song(name=unicode(track['name']), artist=artists, album=unicode(track['album']['name']),
                         source='Spotify', tag=track['id'], inherited_popularity=track['popularity'])
             song.save()
             songs.append(song)
@@ -60,7 +60,7 @@ def parse_soundcloud(data):
         if check_if_exists({'source': 'Soundcloud', 'tag': track.id}):
             songs.append(Song.objects.get(source='Soundcloud', tag=track.id))
         elif track.streamable:
-            song = Song(name=track.title, artist=track.user['username'], album='',
+            song = Song(name=unicode(track.title), artist=unicode(track.user['username']), album='',
                         source='Soundcloud', tag=track.id,
                         inherited_popularity=track.favoritings_count / float(10000))
             song.save()
