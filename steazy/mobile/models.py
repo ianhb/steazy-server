@@ -22,6 +22,9 @@ class Playlist(models.Model):
     def __str__(self):
         return self.name
 
+    def __unicode__(self):
+        return u"%s" % self.name
+
 
 class Song(models.Model):
     SOURCES = [
@@ -47,6 +50,9 @@ class Song(models.Model):
 
     def __str__(self):
         return self.name
+
+    def __unicode__(self):
+        return u"%s" % self.name
 
 
 class Song_to_Playlist(models.Model):
