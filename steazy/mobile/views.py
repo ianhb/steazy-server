@@ -8,8 +8,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from models import Song, Playlist, Song_to_Playlist, Play
-from search import search
+from models import Song, Playlist, Song_to_Playlist, Play, Search
+from search import search_songs
 from serializers import SongSerializer, PlaylistSerializer, UserSerializer, TokenSerializer
 
 
@@ -25,7 +25,14 @@ class SongsList(APIView):
 
     def get(self, request, format=None):
         try:
-            songs = search(request.GET.get('query'))
+            query = request.GET.get('query')
+            try:
+                search = Search(user=request.user, query=query)
+                search.save()
+            except:
+                search = Search(user=User.objects.get(username="admin"), query=query)
+                search.save()
+            songs = search_songs(query)
             serial = SongSerializer(songs, many=True)
             return Response(serial.data)
         except MultiValueDictKeyError:

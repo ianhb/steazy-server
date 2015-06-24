@@ -71,3 +71,14 @@ class Play(models.Model):
     player = models.ForeignKey(User)
 
     date = models.DateTimeField(auto_now_add=True)
+
+
+class Search(models.Model):
+    time = models.DateTimeField(auto_now_add=True)
+
+    user = models.ForeignKey(User)
+
+    query = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return u"%s" % self.query

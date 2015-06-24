@@ -39,7 +39,7 @@ def sort_songs(songs):
     return sorted(songs, key=lambda song: song.inherited_popularity, reverse=True)
 
 
-def search(query):
+def search_songs(query):
     return sort_songs(parse_spotify(search_spotify(query)) + parse_soundcloud(search_soundcloud(query)))
 
 
