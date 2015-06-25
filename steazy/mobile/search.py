@@ -2,7 +2,6 @@ import json
 import urllib2
 
 from django.db.models import Q
-
 import soundcloud as soundcloud
 
 from models import Song
@@ -46,8 +45,8 @@ def search_songs(query):
 
 
 def search_database(query):
-    return sort_songs(Song.objects.filter(Q(name__contains=query) |
-                                          Q(artist__contains=query) | Q(album__contains=query))[0:20])
+    return sort_songs(Song.objects.filter(Q(name__startswith=query) |
+                                          Q(artist__startswith=query) | Q(album__startswith=query))[0:20])
 
 
 def search_soundcloud(argument):
