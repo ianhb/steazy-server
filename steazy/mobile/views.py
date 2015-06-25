@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from models import Song, Playlist, Song_to_Playlist, Play, Search
-from search import search_songs
+from search import search_songs, search_database
 from serializers import SongSerializer, PlaylistSerializer, UserSerializer, TokenSerializer
 
 
@@ -18,11 +18,6 @@ class SongsList(APIView):
         permissions.AllowAny,
     ]
 
-    def _contains(self, data):
-        source = data['source']
-        tag = data['tag']
-        return Song.objects.filter(source=source, tag=tag).exists()
-
     def get(self, request, format=None):
         try:
             query = request.GET.get('query')
@@ -30,9 +25,23 @@ class SongsList(APIView):
                 search = Search(user=request.user, query=query)
                 search.save()
             except:
-                search = Search(user=User.objects.get(username="admin"), query=query)
-                search.save()
+                print "Anonymous Search"
             songs = search_songs(query)
+            serial = SongSerializer(songs, many=True)
+            return Response(serial.data)
+        except MultiValueDictKeyError:
+            return Response(request.data)
+
+
+class FastSongSearch(APIView):
+    permission_classes = [
+        permissions.AllowAny,
+    ]
+
+    def get(self, request, format=None):
+        try:
+            query = request.GET.get('query')
+            songs = search_database(query)
             serial = SongSerializer(songs, many=True)
             return Response(serial.data)
         except MultiValueDictKeyError:
@@ -86,7 +95,7 @@ class CreateUser(APIView):
         request.data['groups'] = [1]
         ser = UserSerializer(data=request.data)
         if ser.is_valid():
-            if (User.objects.filter(email=ser.initial_data['email']).exists()):
+            if User.objects.filter(email=ser.initial_data['email']).exists():
                 data = {}
                 data['email'] = ['This field must be unique']
                 return Response(data, status=status.HTTP_409_CONFLICT)
@@ -96,7 +105,7 @@ class CreateUser(APIView):
                 ser.initial_data['password']
             )
             return Response(TokenSerializer(Token.objects.get(user=user)).data, status=status.HTTP_201_CREATED)
-        return Response(ser._errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PlayView(APIView):
     def post(self, request, format=None):

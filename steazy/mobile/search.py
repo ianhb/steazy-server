@@ -1,6 +1,8 @@
 import json
 import urllib2
 
+from django.db.models import Q
+
 import soundcloud as soundcloud
 
 from models import Song
@@ -43,13 +45,17 @@ def search_songs(query):
     return sort_songs(parse_spotify(search_spotify(query)) + parse_soundcloud(search_soundcloud(query)))
 
 
+def search_database(query):
+    return sort_songs(Song.objects.filter(Q(name__contains=query) |
+                                          Q(artist__contains=query) | Q(album__contains=query))[0:20])
 
-def search_soundcloud(arguement):
+
+def search_soundcloud(argument):
     # create a client object with your app credentials
     client = soundcloud.Client(client_id='81ca87317b91e4051f6d8797e5cce358')
 
     # find all sounds of buskers licensed under 'creative commons share alike'
-    tracks = client.get('/tracks', q=arguement, limit=10, encoding="utf-8")
+    tracks = client.get('/tracks', q=argument, limit=10, encoding="utf-8")
 
     return tracks
 

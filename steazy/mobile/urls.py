@@ -9,6 +9,7 @@ __author__ = 'Ian'
 urlpatterns = patterns('',
                        url(r'^login/$', auth.obtain_auth_token),
                        url(r'^songs/$', views.SongsList.as_view()),
+                       url(r'^songs/fast/$', views.FastSongSearch.as_view()),
                        url(r'^playlists/$', views.PlaylistList.as_view()),
                        url(r'^playlists/(?P<pk>[0-9]+)/$', views.PlaylistDetail.as_view()),
                        url(r'^users/$', views.UserView.as_view()),
