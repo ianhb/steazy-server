@@ -62,9 +62,11 @@ def search_soundcloud(argument):
 def parse_soundcloud(data):
     songs = []
     for track in data:
-        if check_if_exists({'source': 'Soundcloud', 'tag': track.id}):
+        print track.title
+        if track.streamable and check_if_exists({'source': 'Soundcloud', 'tag': track.id}):
             songs.append(Song.objects.get(source='Soundcloud', tag=track.id))
-        elif track.streamable:
+        elif json.load(urllib2.urlopen('https://api.soundcloud.com/tracks/' + str(track.id) +
+                                               '?client_id=81ca87317b91e4051f6d8797e5cce358'))['streamable']:
             song = Song(name=unicode(track.title), artist=unicode(track.user['username']), album='',
                         source='Soundcloud', tag=track.id,
                         inherited_popularity=track.favoritings_count / float(10000))
