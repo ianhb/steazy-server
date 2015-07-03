@@ -50,7 +50,7 @@ class FastSongSearch(APIView):
 
 class PlaylistList(APIView):
     def get(self, request, format=None):
-        playlists = Playlist.objects.all()
+        playlists = Playlist.objects.filter(owner=request.user)
         serial = PlaylistSerializer(playlists, many=True)
         return Response(serial.data)
 
