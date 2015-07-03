@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from django.http import Http404
 
 # Create your views here.
@@ -22,9 +22,11 @@ class SongsList(APIView):
         try:
             query = request.GET.get('query')
             try:
+                if request.user is AnonymousUser:
+                    raise User.DoesNotExist()
                 search = Search(user=request.user, query=query)
                 search.save()
-            except:
+            except User.DoesNotExist:
                 print "Anonymous Search"
             songs = search_songs(query)
             serial = SongSerializer(songs, many=True)
@@ -55,6 +57,7 @@ class PlaylistList(APIView):
         return Response(serial.data)
 
     def post(self, request, format=None):
+        request.data['owner'] = request.user.pk
         serial = PlaylistSerializer(data=request.data)
         if serial.is_valid():
             serial.save()
