@@ -30,9 +30,9 @@ class SongsList(APIView):
                 print "Anonymous Search"
             songs = search_songs(query)
             serial = SongSerializer(songs, many=True)
-            return Response(serial.data)
+            return Response(serial.data, status=status.HTTP_200_OK)
         except MultiValueDictKeyError:
-            return Response(request.data)
+            return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
 
 
 class FastSongSearch(APIView):
@@ -45,9 +45,9 @@ class FastSongSearch(APIView):
             query = request.GET.get('query')
             songs = search_database(query)
             serial = SongSerializer(songs, many=True)
-            return Response(serial.data)
+            return Response(serial.data, status=status.HTTP_200_OK)
         except MultiValueDictKeyError:
-            return Response(request.data)
+            return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PlaylistList(APIView):
@@ -76,15 +76,25 @@ class PlaylistDetail(APIView):
     def get(self, request, pk, format=None):
         playlist = self._get_playlist(pk)
         serial = PlaylistSerializer(playlist)
-        songs = playlist.song_to_playlist_set.all()
-        return Response(serial.data)
+        return Response(serial.data, status=status.HTTP_200_OK)
 
+    def put(self, request, pk, format=None):
+        playlist = self._get_playlist(pk)
+        playlist.name = request.data['name']
+        playlist.save()
+        serial = PlaylistSerializer(playlist)
+        return Response(serial.data, status=status.HTTP_202_ACCEPTED)
+
+    def delete(self, request, pk, format=None):
+        playlist = self._get_playlist(pk)
+        playlist.delete()
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 class UserView(APIView):
     def get(self, request, format=None):
         user = request.user
         serial = UserSerializer(user)
-        return Response(serial.data)
+        return Response(serial.data, status=status.HTTP_200_OK)
 
 
 class CreateUser(APIView):
@@ -140,3 +150,11 @@ class AddToPlaylistView(APIView):
             return Response("Playlist PK DNE", status=status.HTTP_400_BAD_REQUEST)
         except Song.DoesNotExist:
             return Response("Song PK DNE", status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, format=None):
+        try:
+            add = Song_to_Playlist.objects.get(pk=request.data['id'])
+            add.delete()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        except Song_to_Playlist.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)

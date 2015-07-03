@@ -61,7 +61,7 @@ class SongtoPlaylistSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Song_to_Playlist
-        fields = ('song_data',)
+        fields = ('id', 'song_data',)
 
     def get_song_data(self, obj):
         song = obj.song
