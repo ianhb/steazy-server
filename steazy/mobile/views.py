@@ -151,10 +151,14 @@ class AddToPlaylistView(APIView):
         except Song.DoesNotExist:
             return Response("Song PK DNE", status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, format=None):
+
+class AddToPlaylistDetail(APIView):
+    def delete(self, request, pk, format=None):
         try:
-            add = Song_to_Playlist.objects.get(pk=request.data['id'])
+            add = Song_to_Playlist.objects.get(pk=pk)
             add.delete()
             return Response(status=status.HTTP_202_ACCEPTED)
         except Song_to_Playlist.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+        except MultiValueDictKeyError:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
