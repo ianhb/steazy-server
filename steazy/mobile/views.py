@@ -91,8 +91,8 @@ class CreateUser(APIView):
     ]
 
     def post(self, request, format=None):
-        request.data['user_permissions'] = [1]
-        request.data['groups'] = [1]
+        request.data['user_permissions'] = 1
+        request.data['groups'] = 1
         ser = UserSerializer(data=request.data)
         if ser.is_valid():
             if User.objects.filter(email=ser.initial_data['email']).exists():
