@@ -156,8 +156,10 @@ class AddToPlaylistDetail(APIView):
     def delete(self, request, pk, format=None):
         try:
             add = Song_to_Playlist.objects.get(pk=pk)
+            playlist = add.playlist
             add.delete()
-            return Response(status=status.HTTP_202_ACCEPTED)
+            serial = PlaylistSerializer(playlist)
+            return Response(serial.data, status=status.HTTP_202_ACCEPTED)
         except Song_to_Playlist.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         except MultiValueDictKeyError:
