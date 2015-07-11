@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from models import Song, Playlist, Song_to_Playlist, Search
+from models import Song, Playlist, Song_to_Playlist, Search, SpotifyUser
 
 
 class SongsInline(admin.TabularInline):
@@ -20,3 +20,4 @@ class PlaylistAdmin(admin.ModelAdmin):
 admin.site.register(Song)
 admin.site.register(Playlist, PlaylistAdmin)
 admin.site.register(Search)
+admin.site.register(SpotifyUser)

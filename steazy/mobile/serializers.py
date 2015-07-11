@@ -52,9 +52,14 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(serializers.ModelSerializer):
+    state = serializers.SerializerMethodField()
+
     class Meta:
         model = Token
-        fields = ('key',)
+        fields = ('key', 'state',)
+
+    def get_state(self, obj):
+        return obj.user.spotifyuser.state
 
 class SongtoPlaylistSerializer(serializers.ModelSerializer):
     song_data = serializers.SerializerMethodField()

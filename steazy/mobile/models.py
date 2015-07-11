@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
@@ -10,6 +12,24 @@ from django.conf import settings
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
+        state = uuid.uuid4()
+        while SpotifyUser.objects.filter(state=state).exists():
+            state = uuid.uuid4()
+        user = SpotifyUser(user=instance, state=state)
+        user.save()
+
+
+class SpotifyUser(models.Model):
+    user = models.OneToOneField(User)
+    authorization_code = models.CharField(max_length=255)
+    refresh_token = models.CharField(max_length=255)
+    state = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.user.username
+
+    def __unicode__(self):
+        return u"%s" % self.user.username
 
 # Create your models here.
 class Playlist(models.Model):
