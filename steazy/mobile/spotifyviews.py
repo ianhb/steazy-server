@@ -56,3 +56,9 @@ def get_access_token(request):
     access_token = token_request.json()['access_token']
 
     return Response({'access_token': access_token}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', ])
+def get_state(request):
+    state = request.user.spotifyuser.state
+    return Response({'state': state}, status=status.HTTP_200_OK)

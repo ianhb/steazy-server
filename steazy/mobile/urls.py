@@ -15,6 +15,7 @@ urlpatterns = patterns('',
                        url(r'^playlists/(?P<pk>[0-9]+)/$', views.PlaylistDetail.as_view()),
                        url(r'^users/$', views.UserView.as_view()),
                        url(r'^users/create/$', views.CreateUser.as_view()),
+                       url(r'^users/token', spotifyviews.get_state),
                        url(r'^users/spotifycallback', spotifyviews.auth_received),
                        url(r'^users/spotifyaccess', spotifyviews.get_access_token),
 
