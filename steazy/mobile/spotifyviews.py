@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from models import SpotifyUser
 
 if 'RDS_DB_NAME' in os.environ:
-    REDIRECTURI = "http://steazy-dev.elasticbeanstalk.com/user/spotifycallback"
+    REDIRECTURI = "http://steazy-dev.elasticbeanstalk.com/users/spotifycallback"
 else:
     REDIRECTURI = 'http://localhost:8000/users/spotifycallback'
 CLIENT_ID = 'e0fd082de90e4cd7b60bf6047f5033f0'
