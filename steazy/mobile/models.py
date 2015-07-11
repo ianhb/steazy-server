@@ -21,8 +21,8 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 
 class SpotifyUser(models.Model):
     user = models.OneToOneField(User)
-    authorization_code = models.CharField(max_length=255)
-    refresh_token = models.CharField(max_length=255)
+    authorization_code = models.TextField()
+    refresh_token = models.TextField()
     state = models.CharField(max_length=255)
 
     def __str__(self):
