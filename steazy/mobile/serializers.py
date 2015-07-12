@@ -16,13 +16,16 @@ class SongSerializer(serializers.ModelSerializer):
 
 class PlaylistDetailSerializer(serializers.ModelSerializer):
     owner_name = serializers.SerializerMethodField()
+    song_details = serializers.SerializerMethodField()
 
     class Meta:
         model = Playlist
-        fields = ('id', 'name', 'owner_name', 'owner', 'date_created', 'songs',)
 
     def get_owner_name(self, obj):
         return obj.owner.username
+
+    def get_song_details(self, obj):
+        return SongSerializer(obj.songs.all(), many=True).data
 
 
 class PlaylistOverviewSerializer(serializers.ModelSerializer):

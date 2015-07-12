@@ -5,6 +5,7 @@ import requests
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+
 from rest_framework.response import Response
 
 from models import SpotifyUser, Playlist, Song
@@ -121,13 +122,15 @@ def get_spotify_playlists(request):
         name = playlist['name']
         href = playlist['tracks']['href']
         length = playlist['tracks']['total']
+        print length
 
         playlist = get_playlist(request.user, name)
         playlist_list.append(playlist)
 
         songs = []
         adds = playlist.songs.all()
-        for i in range(length / 100):
+        for i in range(0, (length / 100) + 1):
+            print i
             params = {'offset': i * 100}
             playlist_tracks = requests.get(href, headers=api_headers, params=params).json()
             for item in playlist_tracks['items']:
@@ -148,7 +151,7 @@ def get_spotify_playlists(request):
                     songs.append(song)
                 in_set = False
                 for add in adds:
-                    if add.song.__eq__(song):
+                    if add.__eq__(song):
                         in_set = True
                 if not in_set:
                     playlist.songs.add(song)

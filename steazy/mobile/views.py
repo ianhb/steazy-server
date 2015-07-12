@@ -10,7 +10,8 @@ from rest_framework.views import APIView
 
 from models import Song, Playlist, Play, Search
 from search import search_songs, search_database
-from serializers import SongSerializer, PlaylistDetailSerializer, UserSerializer, TokenSerializer
+from serializers import SongSerializer, PlaylistDetailSerializer, UserSerializer, TokenSerializer, \
+    PlaylistOverviewSerializer
 
 
 class SongsList(APIView):
@@ -53,12 +54,12 @@ class FastSongSearch(APIView):
 class PlaylistList(APIView):
     def get(self, request, format=None):
         playlists = Playlist.objects.filter(owner=request.user)
-        serial = PlaylistDetailSerializer(playlists, many=True)
+        serial = PlaylistOverviewSerializer(playlists, many=True)
         return Response(serial.data)
 
     def post(self, request, format=None):
         request.data['owner'] = request.user.pk
-        serial = PlaylistDetailSerializer(data=request.data)
+        serial = PlaylistOverviewSerializer(data=request.data)
         if serial.is_valid():
             serial.save()
             return Response(serial.data, status=status.HTTP_201_CREATED)
