@@ -31,9 +31,10 @@ class SpotifyUser(models.Model):
     def __unicode__(self):
         return u"%s" % self.user.username
 
+
 # Create your models here.
 class Playlist(models.Model):
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=255)
 
     owner = models.ForeignKey(User)
 
