@@ -16,8 +16,6 @@ urlpatterns = patterns('',
                        url(r'^playlists/$', views.PlaylistList.as_view()),
                        url(r'^playlists/(?P<pk>[0-9]+)/$', views.PlaylistDetail.as_view()),
                        url(r'^playlists/spotify', spotifyviews.get_spotify_playlists),
-                       url(r'^add/$', views.AddToPlaylistView.as_view()),
-                       url(r'^add/(?P<pk>[0-9]+)/$', views.AddToPlaylistDetail.as_view()),
 
                        url(r'^users/$', views.UserView.as_view()),
                        url(r'^users/create/$', views.CreateUser.as_view()),

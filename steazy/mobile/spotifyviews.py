@@ -7,9 +7,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from models import SpotifyUser, Playlist, Song, Song_to_Playlist
+from models import SpotifyUser, Playlist, Song
 from search import check_if_exists
-from serializers import PlaylistSerializer
+from serializers import PlaylistDetailSerializer
 
 __author__ = 'Ian'
 
@@ -126,7 +126,7 @@ def get_spotify_playlists(request):
         playlist_list.append(playlist)
 
         songs = []
-        adds = playlist.song_to_playlist_set.all()
+        adds = playlist.songs.all()
         for i in range(length / 100):
             params = {'offset': i * 100}
             playlist_tracks = requests.get(href, headers=api_headers, params=params).json()
@@ -134,8 +134,8 @@ def get_spotify_playlists(request):
                 track = item['track']
                 if track['id'] is None:
                     continue
-                if check_if_exists({'source': 'Spotify', 'tag': track['id']}):
-                    song = Song.objects.get(source='Spotify', tag=track['id'])
+                song = check_if_exists({'source': 'Spotify', 'tag': track['id']})
+                if song is not None:
                     songs.append(song)
                 else:
                     artists = ''
@@ -151,10 +151,9 @@ def get_spotify_playlists(request):
                     if add.song.__eq__(song):
                         in_set = True
                 if not in_set:
-                    add = Song_to_Playlist(song=song, playlist=playlist, added_by=request.user)
-                    add.save()
+                    playlist.songs.add(song)
 
-    playlist_serial = PlaylistSerializer(playlist_list, many=True)
+    playlist_serial = PlaylistDetailSerializer(playlist_list, many=True)
     return Response(playlist_serial.data, status=status.HTTP_200_OK)
 
 

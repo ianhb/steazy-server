@@ -33,20 +33,6 @@ class SpotifyUser(models.Model):
 
 
 # Create your models here.
-class Playlist(models.Model):
-    name = models.CharField(max_length=255)
-
-    owner = models.ForeignKey(User)
-
-    date_created = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
-
-    def __unicode__(self):
-        return u"%s" % self.name
-
-
 class Song(models.Model):
     SOURCES = [
         ('Spotify', 'SPO'),
@@ -76,14 +62,20 @@ class Song(models.Model):
         return u"%s" % self.name
 
 
-class Song_to_Playlist(models.Model):
-    song = models.ForeignKey(Song)
+class Playlist(models.Model):
+    name = models.CharField(max_length=255)
 
-    playlist = models.ForeignKey(Playlist)
+    owner = models.ForeignKey(User)
 
-    date_added = models.DateTimeField(auto_now_add=True)
+    date_created = models.DateTimeField(auto_now_add=True)
 
-    added_by = models.ForeignKey(User)
+    songs = models.ManyToManyField(Song)
+
+    def __str__(self):
+        return self.name
+
+    def __unicode__(self):
+        return u"%s" % self.name
 
 
 class Play(models.Model):

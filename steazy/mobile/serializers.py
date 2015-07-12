@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
-from models import Song, Playlist, Song_to_Playlist
+from models import Song, Playlist
 
 __author__ = 'Ian'
 
@@ -14,20 +14,26 @@ class SongSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'artist', 'album', 'source', 'tag', 'plays', 'inherited_popularity')
 
 
-class PlaylistSerializer(serializers.ModelSerializer):
-    songs = serializers.SerializerMethodField()
+class PlaylistDetailSerializer(serializers.ModelSerializer):
     owner_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Playlist
         fields = ('id', 'name', 'owner_name', 'owner', 'date_created', 'songs',)
 
-    def get_songs(self, obj):
-        songs = obj.song_to_playlist_set
-        return SongtoPlaylistSerializer(songs, many=True).data
-
     def get_owner_name(self, obj):
         return obj.owner.username
+
+
+class PlaylistOverviewSerializer(serializers.ModelSerializer):
+    length = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Playlist
+        fields = ('id', 'name', 'owner', 'length')
+
+    def get_length(self, obj):
+        return obj.songs.count()
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -48,7 +54,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_playlists(self, obj):
         playlists = obj.playlist_set
-        return PlaylistSerializer(playlists, many=True).data
+        return PlaylistOverviewSerializer(playlists, many=True).data
 
 
 class TokenSerializer(serializers.ModelSerializer):
@@ -60,14 +66,3 @@ class TokenSerializer(serializers.ModelSerializer):
 
     def get_state(self, obj):
         return obj.user.spotifyuser.state
-
-class SongtoPlaylistSerializer(serializers.ModelSerializer):
-    song_data = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Song_to_Playlist
-        fields = ('id', 'song_data',)
-
-    def get_song_data(self, obj):
-        song = obj.song
-        return SongSerializer(song).data

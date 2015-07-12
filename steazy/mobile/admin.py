@@ -1,21 +1,12 @@
 from django.contrib import admin
 
 # Register your models here.
-from models import Song, Playlist, Song_to_Playlist, Search, SpotifyUser
-
-
-class SongsInline(admin.TabularInline):
-    model = Song_to_Playlist
-    fields = ['song', 'added_by']
-    extra = 0
-
+from models import Song, Playlist, Search, SpotifyUser
 
 class PlaylistAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None, {'fields': ['name', 'owner']}),
+        (None, {'fields': ['name', 'owner', 'songs']}),
     ]
-    inlines = [SongsInline]
-
 
 admin.site.register(Song)
 admin.site.register(Playlist, PlaylistAdmin)

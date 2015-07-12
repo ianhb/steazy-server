@@ -8,9 +8,9 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from models import Song, Playlist, Song_to_Playlist, Play, Search
+from models import Song, Playlist, Play, Search
 from search import search_songs, search_database
-from serializers import SongSerializer, PlaylistSerializer, UserSerializer, TokenSerializer
+from serializers import SongSerializer, PlaylistDetailSerializer, UserSerializer, TokenSerializer
 
 
 class SongsList(APIView):
@@ -53,12 +53,12 @@ class FastSongSearch(APIView):
 class PlaylistList(APIView):
     def get(self, request, format=None):
         playlists = Playlist.objects.filter(owner=request.user)
-        serial = PlaylistSerializer(playlists, many=True)
+        serial = PlaylistDetailSerializer(playlists, many=True)
         return Response(serial.data)
 
     def post(self, request, format=None):
         request.data['owner'] = request.user.pk
-        serial = PlaylistSerializer(data=request.data)
+        serial = PlaylistDetailSerializer(data=request.data)
         if serial.is_valid():
             serial.save()
             return Response(serial.data, status=status.HTTP_201_CREATED)
@@ -75,20 +75,30 @@ class PlaylistDetail(APIView):
 
     def get(self, request, pk, format=None):
         playlist = self._get_playlist(pk)
-        serial = PlaylistSerializer(playlist)
+        serial = PlaylistDetailSerializer(playlist)
         return Response(serial.data, status=status.HTTP_200_OK)
 
     def put(self, request, pk, format=None):
         playlist = self._get_playlist(pk)
-        playlist.name = request.data['name']
-        playlist.save()
-        serial = PlaylistSerializer(playlist)
+        request_type = request.data['type']
+        request_data = request.data['data']
+        if request_type == 'rename':
+            playlist.name = request_data
+            playlist.save()
+        elif request_type == 'add':
+            song = Song.objects.get(pk=request_data)
+            playlist.songs.add(song)
+        elif request_type == 'remove':
+            song = Song.objects.get(pk=request_data)
+            playlist.songs.remove(song)
+        serial = PlaylistDetailSerializer(playlist)
         return Response(serial.data, status=status.HTTP_202_ACCEPTED)
 
     def delete(self, request, pk, format=None):
         playlist = self._get_playlist(pk)
         playlist.delete()
         return Response(status=status.HTTP_202_ACCEPTED)
+
 
 class UserView(APIView):
     def get(self, request, format=None):
@@ -120,6 +130,7 @@ class CreateUser(APIView):
             return Response(TokenSerializer(Token.objects.get(user=user)).data, status=status.HTTP_201_CREATED)
         return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class PlayView(APIView):
     def post(self, request, format=None):
         data = request.data
@@ -135,32 +146,3 @@ class PlayView(APIView):
         except Song.DoesNotExist:
             return Response("Song PK DNE", status=status.HTTP_400_BAD_REQUEST)
 
-
-class AddToPlaylistView(APIView):
-    def post(self, request, format=None):
-        data = request.data
-        try:
-            playlist = Playlist.objects.get(pk=data['playlist'])
-            song = Song.objects.get(pk=data['song'])
-            user = request.user
-            add = Song_to_Playlist(added_by=user, playlist=playlist, song=song)
-            add.save()
-            return Response(data, status=status.HTTP_201_CREATED)
-        except Playlist.DoesNotExist:
-            return Response("Playlist PK DNE", status=status.HTTP_400_BAD_REQUEST)
-        except Song.DoesNotExist:
-            return Response("Song PK DNE", status=status.HTTP_400_BAD_REQUEST)
-
-
-class AddToPlaylistDetail(APIView):
-    def delete(self, request, pk, format=None):
-        try:
-            add = Song_to_Playlist.objects.get(pk=pk)
-            playlist = add.playlist
-            add.delete()
-            serial = PlaylistSerializer(playlist)
-            return Response(serial.data, status=status.HTTP_202_ACCEPTED)
-        except Song_to_Playlist.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        except MultiValueDictKeyError:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
