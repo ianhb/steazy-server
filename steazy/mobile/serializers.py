@@ -30,13 +30,17 @@ class PlaylistDetailSerializer(serializers.ModelSerializer):
 
 class PlaylistOverviewSerializer(serializers.ModelSerializer):
     length = serializers.SerializerMethodField()
+    owner_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Playlist
-        fields = ('id', 'name', 'owner', 'length')
+        fields = ('id', 'name', 'owner', 'owner_name', 'date_created', 'length')
 
     def get_length(self, obj):
         return obj.songs.count()
+
+    def get_owner_name(self, obj):
+        return obj.owner.username
 
 
 class UserSerializer(serializers.ModelSerializer):

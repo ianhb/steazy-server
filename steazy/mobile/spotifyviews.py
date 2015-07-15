@@ -5,7 +5,6 @@ import requests
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
-
 from rest_framework.response import Response
 
 from models import SpotifyUser, Playlist, Song
@@ -17,7 +16,7 @@ __author__ = 'Ian'
 if 'RDS_DB_NAME' in os.environ:
     REDIRECTURI = "http://steazy-dev.elasticbeanstalk.com/users/spotifycallback"
 else:
-    REDIRECTURI = 'http://localhost:8000/users/spotifycallback'
+    REDIRECTURI = 'http://ian-brix:8000/users/spotifycallback'
 CLIENT_ID = 'e0fd082de90e4cd7b60bf6047f5033f0'
 CLIENT_SECRET = '227a222269bd48358f65c8e1fda0276f'
 SPOTIFYURL = 'https://accounts.spotify.com/api/token'
@@ -122,7 +121,6 @@ def get_spotify_playlists(request):
         name = playlist['name']
         href = playlist['tracks']['href']
         length = playlist['tracks']['total']
-        print length
 
         playlist = get_playlist(request.user, name)
         playlist_list.append(playlist)
@@ -130,7 +128,6 @@ def get_spotify_playlists(request):
         songs = []
         adds = playlist.songs.all()
         for i in range(0, (length / 100) + 1):
-            print i
             params = {'offset': i * 100}
             playlist_tracks = requests.get(href, headers=api_headers, params=params).json()
             for item in playlist_tracks['items']:
