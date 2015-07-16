@@ -3,7 +3,7 @@ branch-defaults:
     environment: steazy-dev
 global:
   application_name: steazy
-  default_ec2_keyname: aws-eb
+  default_ec2_keyname: steazy
   default_platform: Python 2.7
   default_region: us-west-2
   profile: eb-cli
