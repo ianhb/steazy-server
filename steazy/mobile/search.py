@@ -1,11 +1,8 @@
 import calendar
-import json
-import urllib2
 import time
 
 from django.db.models import Q
 import requests
-import soundcloud as soundcloud
 
 from models import Song
 import spotifyviews
@@ -17,6 +14,7 @@ class Spotify:
     """
     Class to handle maintaining the Spotify Client Credentials code to increase query request speed
     """
+
     def __init__(self):
         self.TOKEN_EXPIRES = calendar.timegm(time.gmtime())
         self.TOKEN = None
@@ -129,11 +127,10 @@ def search_soundcloud(argument):
     :return: JSON result of search
     """
     # create a client object with your app credentials
-    client = soundcloud.Client(client_id='81ca87317b91e4051f6d8797e5cce358')
-
-    tracks = client.get('/tracks', q=argument, limit=10, encoding="utf-8")
-
-    return tracks
+    params = {'client_id': '81ca87317b91e4051f6d8797e5cce358',
+              'q': argument, 'filter': 'public'}
+    tracks = requests.get("https://api.soundcloud.com/tracks", params=params)
+    return tracks.json()[:10]
 
 
 def parse_soundcloud(data):
@@ -144,15 +141,14 @@ def parse_soundcloud(data):
     """
     songs = []
     for track in data:
-        print track.title
-        song = check_if_exists({'source': 'Soundcloud', 'tag': track.id})
-        if song is not None:
-            songs.append(song)
-        elif json.load(urllib2.urlopen('https://api.soundcloud.com/tracks/' + str(track.id) +
-                                               '?client_id=81ca87317b91e4051f6d8797e5cce358'))['streamable']:
-            song = Song(name=unicode(track.title), artist=unicode(track.user['username']), album='',
-                        source='Soundcloud', tag=track.id,
-                        inherited_popularity=track.favoritings_count / float(10000))
-            song.save()
-            songs.append(song)
+        if track['streamable']:
+            song = check_if_exists({'source': 'Soundcloud', 'tag': track['id']})
+            if song is not None:
+                songs.append(song)
+            else:
+                song = Song(name=unicode(track['title']), artist=unicode(track['user']['username']), album='',
+                            source='Soundcloud', tag=track['id'],
+                            inherited_popularity=track['playback_count'] / float(200000))
+                song.save()
+                songs.append(song)
     return songs
